@@ -1,0 +1,17 @@
+Program -> Start : !! CodeBlock @@
+
+CodeBlock -> ?? MultiOrder ??
+
+MultiOrder -> MultiOrder Order | Order
+
+Order -> IfStatement | Assignment
+
+IfStatement -> if $$ Comparison $$
+
+Comparison -> Statement > Statement | Statement >= Statement | Statement < Statement | Statement <= Statement | Statement == Statement | Statement != Statement
+
+Assignment -> ID = Statement ^^
+
+Statement -> Statement + EStatement | Statement - EStatement | Statement * EStatement | Statement / EStatement | EStatement
+
+EStatement -> ID | CONST

@@ -1,0 +1,186 @@
+//import section
+
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.*;
+
+import SymbolTable.*;
+
+parser code {:
+
+   public int errNo = 0;
+
+   public static void main( String[] args )
+   {
+      try
+      {
+           FileReader file = new FileReader( args[0] );
+           Scanner scanner = new MPLexer( file );
+           parser parser = new parser( scanner );
+           parser.parse();
+
+             if ( parser.errNo == 0 )
+                         System.out.println( "Analiza zavrsena. U kodu nema gresaka." );
+             else
+                         System.out.println( "Analiza zavrsena. Broj gresaka: " + parser.errNo );
+
+      }
+      catch( Exception e )
+      {
+          e.printStackTrace();
+           System.out.println(e);
+      }
+   }
+
+:};
+
+init with {:
+	symbolTable = new SymbolTable();
+:}
+
+//Terminal symbols
+terminal START, COL, FS, FE, CB, IF, CS, GT, GTE, LT, LTE, E, NE, ASSIGN, EOL, PLUS, MINUS, MULTI, DIV, ID, CONST;
+
+
+//Nonterminal symbols
+nonterminal Program, CodeBlock, MultiOrder, Order, IfStatement, Comparison, Assignment, Statement, EStatement;
+
+//Grammar
+
+Program ::= START COL FS CodeBlock FE
+    {:
+
+        System.out.println("Redukcija po smeni 1.");
+    :}
+    | START COL FS CodeBlock error
+    {:
+        System.out.println("Greska, fali @@ na kraju programa.");
+    :}
+    | START COL FS error
+    {:
+        System.out.println("Greska fali CodeBlock unutar programa.");
+    :}
+    | START COL error
+    {:
+        System.out.println("Greska fali !! posle Start :");
+    :}
+    | START error
+    {:
+        System.out.println("Greska fali : posle Start");
+    :}
+    | error
+    {:
+        System.out.println("Greska fali Start na pocetku programa.");
+    :};
+CodeBlock ::= CB MultiOrder CB
+    {:
+        System.out.println("Redukcija po smeni 2.");
+    :}
+    | CB MultiOrder error
+    {:
+        System.out.println("Greska fali ?? na kraju CodeBlock.");
+    :}
+    | error
+    {:
+        System.out.println("Greska fali ?? na pocetku CodeBlock.");
+    :};
+MultiOrder ::= MultiOrder Order
+    {:
+        System.out.println("Redukcija po smeni 3.");
+    :}
+    |  Order
+    {:
+        System.out.println("Redukcija po smeni 4.");
+    :};
+Order ::= IfStatement
+    {:
+        System.out.println("Redukcija po smeni 5.");
+    :}
+    | Assignment
+    {:
+        System.out.println("Redukcija po smeni 6.");
+    :};
+IfStatement ::= IF CS Comparison CS
+    {:
+        System.out.println("Redukcija po smeni 7.");
+    :}
+    | IF CS Comparison error
+    {:
+        System.out.println("Greska fali $$ na kraju IfStatement.");
+    :}
+    | IF CS error
+    {:
+        System.out.println("Greska fali Comparison u IfStatement.");
+    :}
+    | IF error
+    {:
+        System.out.println("Greska fali $$ na pocetku IfStatement.");
+    :};
+Comparison ::= Statement GT Statement
+    {:
+        System.out.println("Redukcija po smeni 8.");
+    :}
+    | Statement GTE Statement
+    {:
+        System.out.println("Redukcija po smeni 9.");
+    :}
+    | Statement LT Statement
+    {:
+        System.out.println("Redukcija po smeni 10.");
+    :}
+    | Statement LTE Statement
+    {:
+        System.out.println("Redukcija po smeni 11.");
+    :}
+    | Statement E Statement
+    {:
+        System.out.println("Redukcija po smeni 12.");
+    :}
+    Statement NE Statement
+    {:
+        System.out.println("Redukcija po smeni 13.");
+    :};
+Assignment ::= ID ASSIGN Statement EOL
+    {:
+        System.out.println("Redukcija po smeni 14.");
+    :}
+    | ID ASSIGN Statement error
+    {:
+        System.out.println("Greska fali ^^ na kraju Assignment.");
+    :}
+    | ID ASSIGN error
+    {:
+        System.out.println("Greska fali Statement u Assignment.");
+    :}
+    | ID error
+    {:
+        System.out.println("Greska fali = u Assignment.");
+    :};
+Statement ::= Statement PLUS EStatement
+    {:
+        System.out.println("Redukcija po smeni 15.");
+    :}
+    | Statement MINUS EStatement
+    {:
+        System.out.println("Redukcija po smeni 16.");
+    :}
+    | Statement MULTI EStatement
+    {:
+        System.out.println("Redukcija po smeni 17.");
+    :}
+    Statement DIV EStatement
+    {:
+        System.out.println("Redukcija po smeni 18.");
+    :}
+    | EStatement
+    {:
+        System.out.println("Redukcija po smeni 19.");
+    :};
+EStatement ::= ID
+    {:
+        System.out.println("Redukcija po smeni 20.");
+    :}
+    | CONST
+    {:
+        System.out.println("Redukcija po smeni 21.");
+    :};
